@@ -170,8 +170,8 @@ rule qc_kneaddata_pe:
         paired_r  = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_R2.fq.gz",
         unpaired_f = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R1.fq.gz",
         unpaired_r = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R2.fq.gz",
-        all_f = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R1.fq.gz"),
-        all_r = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R2.fq.gz")
+        all_f = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R1.fq"),
+        all_r = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R2.fq")
     params:
         db       = config["kneaddata_db"],
         output_prefix = "{sample}_kneaddata",
