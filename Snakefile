@@ -206,8 +206,8 @@ rule qc_kneaddata_pe:
                   scp %s/{wildcards.sample}_kneaddata_unmatched_1.fastq.gz {output.unpaired_f}
                   scp %s/{wildcards.sample}_kneaddata_unmatched_2.fastq.gz {output.unpaired_r}
 
-                  zcat {output.paired_f} {output.unpaired_f} > {output.all_f}
-                  zcat {output.paired_r} {output.unpaired_r} > {output.all_r}
+                  zcat {output.paired_f} {output.unpaired_f} | {gzip} -c > {output.all_f}
+                  zcat {output.paired_r} {output.unpaired_r} | {gzip} -c > {output.all_r}
                   """ % (temp_dir, temp_dir, temp_dir, temp_dir, temp_dir,
                          temp_dir))
 
