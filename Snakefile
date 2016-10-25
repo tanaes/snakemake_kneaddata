@@ -194,7 +194,7 @@ rule qc_kneaddata_pe:
                     --quality-scores {params.phred} \
                     --threads {threads} \
                     --trimmomatic {trimmomatic} \
-                    --trimmomatic-options "--ILLUMINACLIP:{params.adaptor}:2:30:10 {params.trimmomatic_params}" \
+                    --trimmomatic-options 'ILLUMINACLIP:{params.adaptor}:2:30:10 {params.trimmomatic_params}' \
                   2> {log}
 
                   {gzip} %s/*
@@ -203,6 +203,7 @@ rule qc_kneaddata_pe:
                   scp %s/{wildcards.sample}_kneaddata_paired_2.fastq {output.paired_r}
                   scp %s/{wildcards.sample}_kneaddata_unmatched_1.fastq {output.unpaired_f}
                   scp %s/{wildcards.sample}_kneaddata_unmatched_2.fastq {output.unpaired_r}
+
                   zcat {output.paired_f} {output.unpaired_f} > {output.all_f}
                   zcat {output.paired_r} {output.unpaired_r} > {output.all_r}
                   """ % (temp_dir, temp_dir, temp_dir, temp_dir, temp_dir,
@@ -242,7 +243,7 @@ rule qc_kneaddata_se:
                     --quality-scores {params.phred} \
                     --threads {threads} \
                     --trimmomatic {trimmomatic} \
-                    --trimmomatic-options "--ILLUMINACLIP:{params.adaptor}:2:30:10 {params.trimmomatic_params}" \
+                    --trimmomatic-options 'ILLUMINACLIP:{params.adaptor}:2:30:10 {params.trimmomatic_params}' \
                   2> {log}
 
                   {gzip} %s/*
