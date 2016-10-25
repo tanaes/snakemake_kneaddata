@@ -156,115 +156,102 @@ rule raw_fastqc_sample:
         """
 
 
-rule qc_trimmomatic_pe:
+rule qc_kneaddata_pe:
     """
-    Run trimmomatic on paired end mode to eliminate Illumina adaptors and 
+    Run kneaddata on paired end mode to eliminate Illumina adaptors and 
     remove low quality regions and reads.
-    Inputs _1 and _2 are piped through gzip/pigz.
-    Outputs _1 and _2 are piped to gzip/pigz (level 9).
-    Outputs _3 and _4 are compressed with the builtin compressor from 
-    Trimmomatic. Further on they are catted and compressed with gzip/pigz 
-    (level 9).
-    Note: The cut -f 1 -d " " is to remove additional fields in the FASTQ
-    header. It is done posterior to the trimming since the output comes 
-    slower than the input is read.
-    Number of threads used:
-        4 for trimmomatic
-        2 for gzip inputs
-        2 for gzip outputs
-        Total: 8
     """
     input:
         forward = "data/{sample}/{run}/raw/{sample}_R1.fq.gz",
         reverse = "data/{sample}/{run}/raw/{sample}_R2.fq.gz"
     output:
-        forward  = "data/{sample}/{run}/trimmed/{sample}_R1.trimmed.fq.gz",
-        reverse  = "data/{sample}/{run}/trimmed/{sample}_R2.trimmed.fq.gz",
-        unpaired = "data/{sample}/{run}/trimmed/{sample}_up.trimmed.fq.gz"
+        paired_f  = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_R1.fq.gz",
+        paired_r  = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_R2.fq.gz",
+        unpaired_f = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R1.fq.gz",
+        unpaired_r = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R2.fq.gz",
+        all_f = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R1.fq.gz"),
+        all_r = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R2.fq.gz")
     params:
-        forward  = "{sample}_R1.trimmed.fq.gz",
-        reverse  = "{sample}_R2.trimmed.fq.gz",
-        unpaired_1  = "{sample}_up_R1.trimmed.fq.gz",
-        unpaired_2  = "{sample}_up_R2.trimmed.fq.gz",
-        unpaired = "{sample}_up.trimmed.fq.gz",
+        db       = config["kneaddata_db"],
+        output_prefix = "{sample}_kneaddata",
         adaptor     = lambda wildcards: config["samples_pe"][wildcards.sample]["adaptor"],
         phred       = lambda wildcards: config["samples_pe"][wildcards.sample]["phred"],
         trimmomatic_params = config["trimmomatic_params"]
     benchmark:
-        "benchmarks/{run}/qc/trimmomatic_pe_{sample}.json"
+        "benchmarks/{run}/qc/kneaddata_pe_{sample}.json"
     log:
-        "logs/{run}/qc/trimmomatic_pe_{sample}.log" 
+        "logs/{run}/qc/kneaddata_pe_{sample}.log" 
     threads:
         8
     run:
         with tempfile.TemporaryDirectory(dir=TMP_DIR_ROOT) as temp_dir:
             shell("""
-                  {trimmomatic} PE \
-                    -threads {threads} \
-                    -{params.phred} \
-                    {input.forward} \
-                    {input.reverse} \
-                    %s/{params.forward} \
-                    %s/{params.unpaired_1} \
-                    %s/{params.reverse} \
-                    %s/{params.unpaired_2} \
-                    ILLUMINACLIP:{params.adaptor}:2:30:10 \
-                    {params.trimmomatic_params} \
+                  kneaddata \
+                    --input {input.forward} \
+                    --input {input.reverse} \
+                    --output %s \
+                    --output-prefix {params.output_prefix} \
+                    --reference_db {params.db} \
+                    --quality-scores {params.phred} \
+                    --threads {threads} \
+                    --trimmomatic {trimmomatic} \
+                    --trimmomatic-options "--ILLUMINACLIP:{params.adaptor}:2:30:10 {params.trimmomatic_params}" \
                   2> {log}
+
+                  {gzip} %s/*
                   
-                  zcat %s/{params.unpaired_1} %s/{params.unpaired_2} |
-                  cut -f 1 -d " " |
-                  {gzip} -9 > %s/{params.unpaired}
-                  
-                  scp %s/{params.forward} {output.forward}
-                  scp %s/{params.reverse} {output.reverse}
-                  scp %s/{params.unpaired_2} {output.unpaired}
+                  scp %s/{sample}_kneaddata_paired_1.fastq {output.paired_f}
+                  scp %s/{sample}_kneaddata_paired_2.fastq {output.paired_r}
+                  scp %s/{sample}_kneaddata_unmatched_1.fastq {output.unpaired_f}
+                  scp %s/{sample}_kneaddata_unmatched_2.fastq {output.unpaired_r}
+                  zcat {output.paired_f} {output.unpaired_f} > {output.all_f}
+                  zcat {output.paired_r} {output.unpaired_r} > {output.all_r}
                   """ % (temp_dir, temp_dir, temp_dir, temp_dir, temp_dir,
-                         temp_dir, temp_dir, temp_dir, temp_dir, temp_dir
-                         ))
+                         temp_dir))
 
 
 
-rule qc_trimmomatic_se:
+rule qc_kneaddata_se:
     """
-    Run trimmomatic on single end mode to eliminate Illumina adaptors and 
-        remove low quality regions and reads.
-    Input is piped through gzip/pigz.
-    Output is piped to gzip.
-    Threads used:
-        4 for trimmomatic
-        1 for gzip input
-        1 for gzip output
+    Run kneaddata on single end mode to eliminate Illumina adaptors and 
+    remove low quality regions and reads.
     """
     input:
-        single = "data/{sample}/{run}/raw/{sample}_SE.fq.gz"
+        single = "data/{sample}/{run}/raw/{sample}_SE.fq.gz",
     output:
-        single = "data/{sample}/{run}/trimmed/{sample}_SE.trimmed.fq.gz"
+        single  = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_SE.fq.gz"
     params:
-        single = "{sample}_SE.trimmed.fq.gz",
-        adaptor     = lambda wildcards: config["samples_se"][wildcards.sample]["adaptor"],
-        phred       = lambda wildcards: config["samples_se"][wildcards.sample]["phred"],
+        db       = config["kneaddata_db"],
+        output_prefix = "{sample}_kneaddata",
+        adaptor     = lambda wildcards: config["samples_pe"][wildcards.sample]["adaptor"],
+        phred       = lambda wildcards: config["samples_pe"][wildcards.sample]["phred"],
         trimmomatic_params = config["trimmomatic_params"]
     benchmark:
-        "benchmarks/{run}/qc/trimmomatic_se_{sample}.json"
+        "benchmarks/{run}/qc/kneaddata_pe_{sample}.json"
     log:
-        "logs/{run}/qc/trimmomatic_se_{sample}.log" 
+        "logs/{run}/qc/kneaddata_pe_{sample}.log" 
     threads:
-        6
+        8
     run:
         with tempfile.TemporaryDirectory(dir=TMP_DIR_ROOT) as temp_dir:
             shell("""
-                  {trimmomatic} SE \
-                      -threads {threads} \
-                      -{params.phred} \
-                      {input.single} \
-                      %s/{params.single} \
-                      ILLUMINACLIP:{params.adaptor}:2:30:10 \
-                      {params.trimmomatic_params} \
+                  kneaddata \
+                    --input {input.forward} \
+                    --output %s \
+                    --output-prefix {params.output_prefix} \
+                    --reference_db {params.db} \
+                    --quality-scores {params.phred} \
+                    --threads {threads} \
+                    --trimmomatic {trimmomatic} \
+                    --trimmomatic-options "--ILLUMINACLIP:{params.adaptor}:2:30:10 {params.trimmomatic_params}" \
                   2> {log}
 
-                  scp %s/{params.single} {output.single} 
-                  """ % (temp_dir, temp_dir))
+                  {gzip} %s/*
+                  
+                  scp %s/{sample}_kneaddata.fastq {output.single}
+                  """ % (temp_dir, temp_dir, temp_dir))
+
+
 
 
 rule qc_fastqc:
@@ -273,16 +260,16 @@ rule qc_fastqc:
     One thread per fastq.gz file
     """
     input:
-        fastq = "data/{sample}/{run}/trimmed/{sample}_{end}.trimmed.fq.gz"
+        fastq = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq.gz"
     output:
-        html = "data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.html",
-        zip =  "data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.zip"
+        html = "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html",
+        zip =  "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip"
     threads:
         1
     log:
-        "logs/{run}/qc/fastqc_trimmed_{sample}_{end}.log"
+        "logs/{run}/qc/fastqc_kneaddata_{sample}_{end}.log"
     benchmark:
-        "benchmarks/{run}/qc/fastqc_trimmed_{sample}_{end}.json"
+        "benchmarks/{run}/qc/fastqc_kneaddata_{sample}_{end}.json"
     shell:
         """
         fastqc \
@@ -294,12 +281,12 @@ rule qc_fastqc:
 
 rule multiQC_run:
     input: 
-        expand("data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.html", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
-        expand("data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.zip", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
+        expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
+        expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
         expand("data/{sample}/{run}/fastqc_raw/{sample}_{end}_fastqc.html", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
         expand("data/{sample}/{run}/fastqc_raw/{sample}_{end}_fastqc.zip", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
-        expand("data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.html", sample=SAMPLES_SE, run=RUN, end="SE".split()),
-        expand("data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.zip", sample=SAMPLES_SE, run=RUN, end="SE".split()),
+        expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html", sample=SAMPLES_SE, run=RUN, end="SE".split()),
+        expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip", sample=SAMPLES_SE, run=RUN, end="SE".split()),
         expand("data/{sample}/{run}/fastqc_raw/{sample}_{end}_fastqc.html", sample=SAMPLES_SE, run=RUN, end="SE".split()),
         expand("data/{sample}/{run}/fastqc_raw/{sample}_{end}_fastqc.zip", sample=SAMPLES_SE, run=RUN, end="SE".split())
     output:
@@ -319,12 +306,12 @@ rule multiQC_run:
 
 rule multiQC_all:
     input:
-        expand("data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.html", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
-        expand("data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.zip", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
+        expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
+        expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
         expand("data/{sample}/{run}/fastqc_raw/{sample}_{end}_fastqc.html", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
         expand("data/{sample}/{run}/fastqc_raw/{sample}_{end}_fastqc.zip", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
-        expand("data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.html", sample=SAMPLES_SE, run=RUN, end="SE".split()),
-        expand("data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.zip", sample=SAMPLES_SE, run=RUN, end="SE".split()),
+        expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html", sample=SAMPLES_SE, run=RUN, end="SE".split()),
+        expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip", sample=SAMPLES_SE, run=RUN, end="SE".split()),
         expand("data/{sample}/{run}/fastqc_raw/{sample}_{end}_fastqc.html", sample=SAMPLES_SE, run=RUN, end="SE".split()),
         expand("data/{sample}/{run}/fastqc_raw/{sample}_{end}_fastqc.zip", sample=SAMPLES_SE, run=RUN, end="SE".split())
     output:
