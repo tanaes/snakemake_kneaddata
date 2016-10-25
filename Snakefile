@@ -46,7 +46,7 @@ rule all:
             "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_{end}.fq.gz",
             sample = SAMPLES_PE,
             run = RUN,
-            end = "R1 R2 up".split()
+            end = "R1 R2".split()
         ) + expand( # fastqc zip and html for raw SE data
             "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq.gz",
             sample = SAMPLES_SE,
