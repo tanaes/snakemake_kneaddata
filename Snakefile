@@ -273,7 +273,7 @@ rule qc_fastqc:
     shell:
         """
         fastqc \
-            --outdir data/{wildcards.sample}/{wildcards.run}/fastqc_trimmed \
+            --outdir data/{wildcards.sample}/{wildcards.run}/fastqc_kneaddata \
             {input.fastq} 
         2> {log} 1>&2
         """
