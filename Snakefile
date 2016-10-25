@@ -14,7 +14,6 @@ SAMPLES_SE = config["samples_se"] if "samples_se" in config else []
 trimmomatic = config["software"]["trimmomatic"]
 gzip        = config["software"]["gzip"]
 
-
 localrules: raw_make_links_pe, raw_make_links_se, multiQC_run, multiQC_all
 
 
@@ -44,24 +43,24 @@ rule all:
             extension = "zip html".split()
         ),
         expand( # trimmomatic output for PE data
-            "data/{sample}/{run}/trimmed/{sample}_{end}.trimmed.fq.gz",
+            "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_{end}.fq.gz",
             sample = SAMPLES_PE,
             run = RUN,
             end = "R1 R2 up".split()
         ) + expand( # fastqc zip and html for raw SE data
-            "data/{sample}/{run}/trimmed/{sample}_{end}.trimmed.fq.gz",
+            "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq.gz",
             sample = SAMPLES_SE,
             run = RUN,
             end = "SE".split()
         ),
         expand(
-            "data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.{extension}",
+            "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.{extension}",
             sample = SAMPLES_PE,
             end = "R1 R2".split(),
             run = RUN,
             extension = "zip html".split()
         ) + expand(
-            "data/{sample}/{run}/fastqc_trimmed/{sample}_{end}.trimmed_fastqc.{extension}",
+            "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.{extension}",
             sample = SAMPLES_SE,
             end = "SE".split(),
             run = RUN,
