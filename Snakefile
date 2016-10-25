@@ -192,14 +192,14 @@ rule qc_kneaddata_pe:
                     --input {input.reverse} \
                     --output %s \
                     --output-prefix {params.output_prefix} \
-                    --reference_db {params.db} \
+                    --reference-db {params.db} \
                     --quality-scores {params.phred} \
                     --threads {threads} \
                     --trimmomatic {trimmomatic} \
                     --trimmomatic-options 'ILLUMINACLIP:{params.adaptor}:2:30:10 {params.trimmomatic_params}' \
                   2> {log}
 
-                  {gzip} %s/*
+                  {gzip} %s/{wildcards.sample}_kneaddata_paired_1.fastq
                   
                   scp %s/{wildcards.sample}_kneaddata_paired_1.fastq {output.paired_f}
                   scp %s/{wildcards.sample}_kneaddata_paired_2.fastq {output.paired_r}
@@ -241,7 +241,7 @@ rule qc_kneaddata_se:
                     --input {input.forward} \
                     --output %s \
                     --output-prefix {params.output_prefix} \
-                    --reference_db {params.db} \
+                    --reference-db {params.db} \
                     --quality-scores {params.phred} \
                     --threads {threads} \
                     --trimmomatic {trimmomatic} \
