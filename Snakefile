@@ -199,10 +199,10 @@ rule qc_kneaddata_pe:
 
                   {gzip} %s/*
                   
-                  scp %s/{sample}_kneaddata_paired_1.fastq {output.paired_f}
-                  scp %s/{sample}_kneaddata_paired_2.fastq {output.paired_r}
-                  scp %s/{sample}_kneaddata_unmatched_1.fastq {output.unpaired_f}
-                  scp %s/{sample}_kneaddata_unmatched_2.fastq {output.unpaired_r}
+                  scp %s/{wildcards.sample}_kneaddata_paired_1.fastq {output.paired_f}
+                  scp %s/{wildcards.sample}_kneaddata_paired_2.fastq {output.paired_r}
+                  scp %s/{wildcards.sample}_kneaddata_unmatched_1.fastq {output.unpaired_f}
+                  scp %s/{wildcards.sample}_kneaddata_unmatched_2.fastq {output.unpaired_r}
                   zcat {output.paired_f} {output.unpaired_f} > {output.all_f}
                   zcat {output.paired_r} {output.unpaired_r} > {output.all_r}
                   """ % (temp_dir, temp_dir, temp_dir, temp_dir, temp_dir,
@@ -247,10 +247,8 @@ rule qc_kneaddata_se:
 
                   {gzip} %s/*
                   
-                  scp %s/{sample}_kneaddata.fastq {output.single}
+                  scp %s/{wildcards.sample}_kneaddata.fastq {output.single}
                   """ % (temp_dir, temp_dir, temp_dir))
-
-
 
 
 rule qc_fastqc:
