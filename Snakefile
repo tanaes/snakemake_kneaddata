@@ -260,7 +260,7 @@ rule qc_fastqc:
     One thread per fastq.gz file
     """
     input:
-        fastq = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq.gz"
+        fastq = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq"
     output:
         html = "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html",
         zip =  "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip"
