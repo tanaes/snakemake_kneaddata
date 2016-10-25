@@ -16,6 +16,8 @@ gzip        = config["software"]["gzip"]
 
 localrules: raw_make_links_pe, raw_make_links_se, multiQC_run, multiQC_all
 
+ENV_KNEAD = "source activate kneaddata"
+shell.prefix(ENV_KNEAD + '; ')
 
 #### Top-level rules: rules to execute a subset of the pipeline
 
@@ -185,7 +187,6 @@ rule qc_kneaddata_pe:
     run:
         with tempfile.TemporaryDirectory(dir=TMP_DIR_ROOT) as temp_dir:
             shell("""
-                  source activate kneaddata
                   kneaddata \
                     --input {input.forward} \
                     --input {input.reverse} \
@@ -236,7 +237,6 @@ rule qc_kneaddata_se:
     run:
         with tempfile.TemporaryDirectory(dir=TMP_DIR_ROOT) as temp_dir:
             shell("""
-                  source activate kneaddata
                   kneaddata \
                     --input {input.forward} \
                     --output %s \
