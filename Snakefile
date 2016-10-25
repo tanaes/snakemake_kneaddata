@@ -170,8 +170,8 @@ rule qc_kneaddata_pe:
         paired_r  = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_R2.fq.gz",
         unpaired_f = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R1.fq.gz",
         unpaired_r = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R2.fq.gz",
-        all_f = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R1.fq"),
-        all_r = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R2.fq")
+        all_f = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R1.fq.gz"),
+        all_r = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R2.fq.gz")
     params:
         db       = config["kneaddata_db"],
         output_prefix = "{sample}_kneaddata",
@@ -206,8 +206,8 @@ rule qc_kneaddata_pe:
                   scp %s/{wildcards.sample}_kneaddata_unmatched_1.fastq.gz {output.unpaired_f}
                   scp %s/{wildcards.sample}_kneaddata_unmatched_2.fastq.gz {output.unpaired_r}
 
-                  zcat {output.paired_f} {output.unpaired_f} > {output.all_f}
-                  zcat {output.paired_r} {output.unpaired_r} > {output.all_r}
+                  cat {output.paired_f} {output.unpaired_f} > {output.all_f}
+                  cat {output.paired_r} {output.unpaired_r} > {output.all_r}
                   """ % (temp_dir, temp_dir, temp_dir, temp_dir, temp_dir,
                          temp_dir))
 
@@ -260,7 +260,7 @@ rule qc_fastqc:
     One thread per fastq.gz file
     """
     input:
-        fastq = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq"
+        fastq = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq.gz"
     output:
         html = "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html",
         zip =  "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip"
