@@ -185,6 +185,7 @@ rule qc_kneaddata_pe:
     run:
         with tempfile.TemporaryDirectory(dir=TMP_DIR_ROOT) as temp_dir:
             shell("""
+                  source activate kneaddata
                   kneaddata \
                     --input {input.forward} \
                     --input {input.reverse} \
@@ -235,6 +236,7 @@ rule qc_kneaddata_se:
     run:
         with tempfile.TemporaryDirectory(dir=TMP_DIR_ROOT) as temp_dir:
             shell("""
+                  source activate kneaddata
                   kneaddata \
                     --input {input.forward} \
                     --output %s \
