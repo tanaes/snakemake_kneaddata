@@ -1,7 +1,11 @@
 TMP_DIR_ROOT:
-    "./"
+    "/localhost"
 RUN:
     test1
+KNEAD_ENV:
+    source activate kneaddata
+kneaddata_db:
+    $CONDA_ENV_PATH/share/kd_dbs/demo
 
 samples_pe:
     sample1:
@@ -23,9 +27,8 @@ samples_se:
 
 
 software:
-    trimmomatic:    java -jar /home/jgsanders/git_sw/git_bin/Trimmomatic-0.36/trimmomatic-0.36.jar
-    gzip:           pigz
+    trimmomatic:    $CONDA_ENV_PATH/share/trimmomatic-*
+    gzip:           gzip
 
 trimmomatic_params:
     LEADING:20 TRAILING:20 AVGQUAL:30 MINLEN:3 TOPHRED33
-
