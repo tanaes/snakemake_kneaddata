@@ -77,11 +77,11 @@ bash ./launch.sh ./ --configfile config_example_run.yaml
 ```
 
 The workflow creates three output directories: data, logs, and benchmarks. The
-processed files are located in data/[sample_prefix]/[run_name]/, and include
-the cleaned and trimmed FASTQ files in data/[sample_prefix]/[run_name]/kneaddata,
-the pre- and post-cleaned FastQC output in data/[sample_prefix]/[run_name]/fastqc_raw
-and data/[sample_prefix]/[run_name]/fastqc_kneaddata, and the MultiQC summary
-of FastQC results in data/MultiQC.
+processed files are located in `data/[sample_prefix]/[run_name]/`, and include
+the cleaned and trimmed FASTQ files in `data/[sample_prefix]/[run_name]/kneaddata`,
+the pre- and post-cleaned FastQC output in `data/[sample_prefix]/[run_name]/fastqc_raw`
+and `data/[sample_prefix]/[run_name]/fastqc_kneaddata`, and the MultiQC summary
+of FastQC results in `data/MultiQC`.
 
 ## Creating new config.yaml files
 

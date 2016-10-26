@@ -1,4 +1,4 @@
-TMP_DIR_ROOT: /tmp
+TMP_DIR_ROOT: /localscratch
 RUN: example_run
 KNEAD_ENV: source activate kneaddata
 kneaddata_db: $CONDA_ENV_PATH/share/kd_dbs/demo
