@@ -3,21 +3,25 @@ import os
 import glob
 
 
-# configfile: "config.yaml"
-
+# Config parameters from config.yaml file
 TMP_DIR_ROOT = config["TMP_DIR_ROOT"]
 RUN = config["RUN"]
 SAMPLES_PE = config["samples_pe"] if "samples_pe" in config else []
 SAMPLES_SE = config["samples_se"] if "samples_se" in config else []
 
-# Path to programs (or element on path)
+# Path to programs
 trimmomatic = config["software"]["trimmomatic"]
 gzip        = config["software"]["gzip"]
 
+# These rules are not processor intensive, and will execute on the head node
+# without being allocated to compute nodes
 localrules: raw_make_links_pe, raw_make_links_se, multiQC_run, multiQC_all
 
+# This specifices the environment setup command for running compute jobs
+# (for example, source activate kneaddata) and is specified in config.yaml
 ENV_KNEAD = config["KNEAD_ENV"]
 shell.prefix(ENV_KNEAD + '; ')
+
 
 #### Top-level rules: rules to execute a subset of the pipeline
 
@@ -25,9 +29,8 @@ rule all:
     """
     Rule to do all the Quality Control:
         - raw_fastqc
-        - qc_trimmomatic_pe
-        - qc_trimmomatic_se
-        - qc_interleave_pe_pe
+        - qc_kneaddata_pe
+        - qc_kneaddata_se
         - qc_fastqc
     """
     input:
@@ -97,6 +100,17 @@ rule raw_fastqc:
 
 
 rule raw_make_links_pe:
+    """
+    Makes symbolic links to original read files.
+    We do this so we can be sure of file naming in downstream steps. 
+
+    Note that readlink -f does not have the same behavior on Mac OSX, so this
+    step will fail. If running on MacOSX, can ensure that config.yaml specifies
+    path to original file and replace with:
+
+    ln -s {input.forward} {output.forward} 2> {log}
+    ln -s {input.reverse} {output.reverse} 2> {log}
+    """
     input:
         forward = lambda wildcards: config["samples_pe"][wildcards.sample]["forward"],
         reverse = lambda wildcards: config["samples_pe"][wildcards.sample]["reverse"]
@@ -117,6 +131,16 @@ rule raw_make_links_pe:
 
 
 rule raw_make_links_se:
+    """
+    Makes symbolic links to original read files.
+    We do this so we can be sure of file naming in downstream steps. 
+
+    Note that readlink -f does not have the same behavior on Mac OSX, so this
+    step will fail. If running on MacOSX, can ensure that config.yaml specifies
+    path to original file and replace with:
+
+    ln -s {input.single} {output.single} 2> {log}
+    """
     input:
         single = lambda wildcards: config["samples_se"][wildcards.sample]["forward"],
     output:
@@ -159,8 +183,8 @@ rule raw_fastqc_sample:
 
 rule qc_kneaddata_pe:
     """
-    Run kneaddata on paired end mode to eliminate Illumina adaptors and 
-    remove low quality regions and reads.
+    Run kneaddata on paired end mode to filter host reads, eliminate Illumina
+    adaptors and remove low quality regions and reads.
     """
     input:
         forward = "data/{sample}/{run}/raw/{sample}_R1.fq.gz",
@@ -215,8 +239,8 @@ rule qc_kneaddata_pe:
 
 rule qc_kneaddata_se:
     """
-    Run kneaddata on single end mode to eliminate Illumina adaptors and 
-    remove low quality regions and reads.
+    Run kneaddata on single end mode to filter host reads, eliminate Illumina
+    adaptors and remove low quality regions and reads.
     """
     input:
         single = "data/{sample}/{run}/raw/{sample}_SE.fq.gz",
@@ -280,6 +304,10 @@ rule qc_fastqc:
 
 
 rule multiQC_run:
+    """
+    Run MultiQC summarization on all of the FastQC datafiles produced by the
+    pipeline for a given run. 
+    """
     input: 
         expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
         expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
@@ -305,6 +333,14 @@ rule multiQC_run:
 
 
 rule multiQC_all:
+    """
+    When multiple runs have been done, this will summarize all of the outputs
+    for all of the runs. 
+
+    Note that this will just search the entire ./data folder for FastQC output;
+    the inputs are all provided to ensure that it doesn't execute until all the
+    files for the current run have executed.
+    """
     input:
         expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),
         expand("data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip", sample=SAMPLES_PE, run=RUN, end="R1 R2".split()),

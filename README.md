@@ -7,7 +7,7 @@ basic quality control and human read removal from metagenomics data.
 This workflow is customized for execution on Barnacle, the Knight Lab's cluster
 compute environment. It can be easily adapted to run in other environments by
 modifying the cluster parameters in [cluster.json](./cluster.json) and
-[launch.sh](./launch.sh.
+[launch.sh](./launch.sh).
 
 ## Installation
 [install.sh](./install.sh) has a basic series of commands to set this workflow 
@@ -86,7 +86,7 @@ of FastQC results in `data/MultiQC`.
 ## Creating new config.yaml files
 
 I have provided an iPython notebook [config_prep.ipynb](config_prep.ipynb) that
-you can use toneasily generate config files for your own data. 
+you can use to easily generate config files for your own data. 
 
 You will need the sequencing manifest provided by IGM, and the location of the
 directory with the per-sample FASTQ files on Barnacle. The example ipynb can
