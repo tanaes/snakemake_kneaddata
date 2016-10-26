@@ -6,13 +6,14 @@ basic quality control and human read removal from metagenomics data.
 ## Background
 This workflow is customized for execution on Barnacle, the Knight Lab's cluster
 compute environment. It can be easily adapted to run in other environments by
-modifying the cluster parameters in [cluster.json] and [launch.sh].
+modifying the cluster parameters in [cluster.json](./cluster.json) and
+[launch.sh](./launch.sh.
 
 ## Installation
-[install.sh] has a basic series of commands to set this workflow up in your
-Barnacle environment using Miniconda. This assumes you already have Miniconda
-installed in your home directory; if not, you can install following the
-directions [here](http://conda.pydata.org/miniconda.html).
+[install.sh](./install.sh) has a basic series of commands to set this workflow 
+up in your Barnacle environment using Miniconda. This assumes you already have
+Miniconda installed in your home directory; if not, you can install following
+the directions [here](http://conda.pydata.org/miniconda.html).
 
 To install this workflow, first make a new miniconda environment named
 'kneaddata':
@@ -50,13 +51,13 @@ If you want to run against a full human genome database, run the following:
 
 ## Usage
 
-This workflow requires the [Snakefile] and a config.yaml that specifies
-filepaths and parameter values. 
+This workflow requires the [Snakefile](./Snakefile) and a
+[config.yaml](./config.yaml) that specifies filepaths and parameter values. 
 
 An example file (and corresponding example data) has been provided in
-[config_example_run.yaml]. To execute the workflow against these test data,
-make sure you are in the kneaddata environment, navigate to the git repository
-directory, and execute:
+[config_example_run.yaml](config_example_run.yaml). To execute the workflow
+against these test data, make sure you are in the kneaddata environment,
+navigate to the git repository directory, and execute:
 
 ```
 snakemake --configfile config_example_run.yaml
@@ -77,8 +78,8 @@ bash ./launch.sh ./ --configfile config_example_run.yaml
 
 ## Creating new config.yaml files
 
-I have provided an iPython notebook [config_prep.ipynb] that you can use to
-easily generate config files for your own data. 
+I have provided an iPython notebook [config_prep.ipynb](config_prep.ipynb) that
+you can use toneasily generate config files for your own data. 
 
 You will need the sequencing manifest provided by IGM, and the location of the
 directory with the per-sample FASTQ files on Barnacle. The example ipynb can
