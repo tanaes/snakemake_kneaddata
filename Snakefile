@@ -16,7 +16,7 @@ gzip        = config["software"]["gzip"]
 
 localrules: raw_make_links_pe, raw_make_links_se, multiQC_run, multiQC_all
 
-ENV_KNEAD = "source activate kneaddata"
+ENV_KNEAD = config["KNEAD_ENV"]
 shell.prefix(ENV_KNEAD + '; ')
 
 #### Top-level rules: rules to execute a subset of the pipeline

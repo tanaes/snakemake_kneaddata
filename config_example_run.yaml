@@ -1,18 +1,19 @@
-TMP_DIR_ROOT: /localscratch
+TMP_DIR_ROOT: /tmp
 RUN: example_run
-samples_se: null
+KNEAD_ENV: source activate kneaddata
+kneaddata_db: $CONDA_ENV_PATH/share/kd_dbs/demo
 samples_pe:
   sample1:
-    adaptor: /home/jgsanders/git_sw/git_bin/Trimmomatic-0.36/adapters/TruSeq3-PE-2.fa
+    adaptor: $CONDA_ENV_PATH/share/trimmomatic-*/adapters/TruSeq3-PE-2.fa
     forward: ./example/reads/Run1/sample1_S312_R1_L001.fastq.gz
     phred: phred33
     reverse: ./example/reads/Run1/sample1_S312_R2_L001.fastq.gz
   sample2:
-    adaptor: /home/jgsanders/git_sw/git_bin/Trimmomatic-0.36/adapters/TruSeq3-PE-2.fa
+    adaptor: $CONDA_ENV_PATH/share/trimmomatic-*/adapters/TruSeq3-PE-2.fa
     forward: ./example/reads/Run1/sample2_S521_R1_L001.fastq.gz
     phred: phred33
     reverse: ./example/reads/Run1/sample2_S521_R2_L001.fastq.gz
 software:
-  gzip: pigz
-  trimmomatic: /home/jgsanders/git_sw/git_bin/Trimmomatic-0.36
+  gzip: gzip
+  trimmomatic: $CONDA_ENV_PATH/share/trimmomatic-*
 trimmomatic_params: LEADING:20 TRAILING:20 AVGQUAL:30 MINLEN:32 TOPHRED33
