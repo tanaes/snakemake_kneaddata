@@ -417,7 +417,7 @@ rule combine_metaphlan:
         expand("data/{sample}/{run}/metaphlan2/{sample}_metaphlan_output.tsv",
                sample=SAMPLES_PE, run=RUN)
     output:
-        joint_prof = "data/combined_analysis/{run}/humann2/joined_taxonomic_profile.tsv"
+        joint_prof = "data/combined_analysis/{run}/humann2/joined_taxonomic_profile.tsv",
         max_prof = "data/combined_analysis/{run}/humann2/joined_taxonomic_profile_max.tsv"
     threads:
         1
