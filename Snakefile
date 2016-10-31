@@ -480,7 +480,7 @@ rule combine_metaphlan:
     run:
         temp_dir = "data/combined_analysis/tempdir"
         for file in input:
-            shell("ln -s {0} {1}/.".format(file, temp_dir))
+            shell("cp {0} {1}/.".format(file, temp_dir))
         shell("""
               humann2_join_tables --input %s --output {output.joint_prof}
               humann2_reduce_table --input {output.joint_prof} \
