@@ -27,6 +27,11 @@ if "METAPHLAN_ENV" in config:
 else:
     METAPHLAN_ENV = config["KNEAD_ENV"]
 
+if "METAPHLAN_DB" in config:
+    METAPHLAN_DB = config["METAPHLAN_DB"]
+else:
+    METAPHLAN_DB = '$mpa_dir'
+
 
 #### Top-level rules: rules to execute a subset of the pipeline
 
@@ -383,8 +388,6 @@ rule metaphlan2_sample_pe:
         "data/{sample}/{run}/metaphlan2/{sample}_metaphlan_output.tsv"
     threads:
         8
-    params:
-        env = METAPHLAN_ENV
     log:
         "logs/{run}/analysis/metaphlan2_sample_pe_{sample}.log"
     benchmark:
@@ -394,6 +397,8 @@ rule metaphlan2_sample_pe:
         with tempfile.TemporaryDirectory(dir=TMP_DIR_ROOT) as temp_dir:
             shell("""
                   set +u; {METAPHLAN_ENV}; set -u
+
+                  export mpa_dir={METAPHLAN_DB}
 
                   metaphlan2.py \
                     --input_type fastq <(zcat {input.paired_f} {input.unpaired_f}) \
