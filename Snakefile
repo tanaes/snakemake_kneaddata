@@ -224,6 +224,11 @@ rule qc_kneaddata_pe:
                   2> {log}
 
                   {gzip} %s/*
+
+                  touch %s/{wildcards.sample}_kneaddata_paired_1.fastq.gz
+                  touch %s/{wildcards.sample}_kneaddata_paired_2.fastq.gz
+                  touch %s/{wildcards.sample}_kneaddata_unmatched_1.fastq.gz
+                  touch %s/{wildcards.sample}_kneaddata_unmatched_2.fastq.gz
                   
                   scp %s/{wildcards.sample}_kneaddata_paired_1.fastq.gz {output.paired_f}
                   scp %s/{wildcards.sample}_kneaddata_paired_2.fastq.gz {output.paired_r}
@@ -233,7 +238,7 @@ rule qc_kneaddata_pe:
                   cat {output.paired_f} {output.unpaired_f} > {output.all_f}
                   cat {output.paired_r} {output.unpaired_r} > {output.all_r}
                   """ % (temp_dir, temp_dir, temp_dir, temp_dir, temp_dir,
-                         temp_dir))
+                         temp_dir, temp_dir, temp_dir, temp_dir, temp_dir))
 
 
 
