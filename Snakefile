@@ -257,7 +257,7 @@ rule qc_kneaddata_pe:
         adaptor     = lambda wildcards: config["samples_pe"][wildcards.sample]["adaptor"],
         phred       = lambda wildcards: config["samples_pe"][wildcards.sample]["phred"],
         trimmomatic_params = config["trimmomatic_params"]
-    benchmark:
+    benchmark:  
         "benchmarks/{run}/qc/kneaddata_pe_{sample}.json"
     log:
         "logs/{run}/qc/kneaddata_pe_{sample}.log" 
@@ -478,15 +478,15 @@ rule combine_metaphlan:
     benchmark:
         "benchmarks/{run}/analysis/combine_metaphlan.json"
     run:
-        with "data/combined_analysis/tempdir" as temp_dir:
-            for file in input:
-                shell("ln -s {0} {1}/.".format(file, temp_dir))
-            shell("""
-                  humann2_join_tables --input %s --output {output.joint_prof}
-                  humann2_reduce_table --input {output.joint_prof} \
-                  --output {output.max_prof} --function max --sort-by level
-                  """ % (temp_dir))
-            shell("")
+        temp_dir = "data/combined_analysis/tempdir"
+        for file in input:
+            shell("ln -s {0} {1}/.".format(file, temp_dir))
+        shell("""
+              humann2_join_tables --input %s --output {output.joint_prof}
+              humann2_reduce_table --input {output.joint_prof} \
+              --output {output.max_prof} --function max --sort-by level
+              """ % (temp_dir))
+        shell("")
 
 # rule make_custom_chocophlan_db:
 
