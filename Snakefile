@@ -286,7 +286,7 @@ rule qc_fastqc_pe:
     """
     input:
         fastq = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_{end}.fq.gz",
-   output:
+    output:
         html = "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_paired_{end}_fastqc.html",
         zip =  "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_paired_{end}_fastqc.zip"
     threads:
