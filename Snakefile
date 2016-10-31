@@ -135,6 +135,25 @@ rule humann2:
             run = RUN
         )
 
+rule metaphlan2:
+    """
+    Rule to execute metaphlan2 and humann2
+    """
+    input:
+        expand(
+            "data/{sample}/{run}/metaphlan2/{sample}_metaphlan_output.tsv",
+            sample = SAMPLES_PE,
+            run = RUN
+        ) +
+        expand(
+            "data/combined_analysis/{run}/humann2/joined_taxonomic_profile.tsv",
+            run = RUN
+        ),
+        expand(
+            "data/combined_analysis/{run}/humann2/joined_taxonomic_profile_max.tsv",
+            run = RUN
+        )
+
 rule raw_make_links_pe:
     """
     Makes symbolic links to original read files.
