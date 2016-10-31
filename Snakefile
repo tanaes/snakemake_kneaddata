@@ -27,8 +27,8 @@ if "METAPHLAN_ENV" in config:
 else:
     METAPHLAN_ENV = config["KNEAD_ENV"]
 
-if "METAPHLAN_DB" in config:
-    METAPHLAN_DB = config["METAPHLAN_DB"]
+if "METAPHLAN_DIR" in config:
+    METAPHLAN_DIR = config["METAPHLAN_DIR"]
 
 if "HUMANN2_NT_DB" in config:
     HUMANN2_NT_DB = config["HUMANN2_NT_DB"]
@@ -424,7 +424,7 @@ rule metaphlan2_sample_pe:
             shell("""
                   set +u; {METAPHLAN_ENV}; set -u
 
-                  export mpa_dir={METAPHLAN_DB}
+                  export mpa_dir={METAPHLAN_DIR}
 
                   echo $mpa_dir
 
@@ -432,8 +432,8 @@ rule metaphlan2_sample_pe:
 
                   metaphlan2.py %s/input.fastq \
                     --input_type fastq \
-                    --mpa_pkl {METAPHLAN_DB}/mpa_v20_m200.pkl \
-                    --bowtie2db {METAPHLAN_DB}/mpa_v20_m200 \
+                    --mpa_pkl {METAPHLAN_DIR}/db_v20/mpa_v20_m200.pkl \
+                    --bowtie2db {METAPHLAN_DIR}/db_v20/mpa_v20_m200 \
                     --nproc {threads} \
                     --tmp_dir %s \
                     --no_map \
@@ -501,7 +501,8 @@ rule humann2_sample_pe:
                   --output %s/{wildcards.sample} \
                   --output-basename {wildcards.sample} \
                   --nucleotide-database {HUMANN2_NT_DB} \
-                  --protein-database {HUMANN2_AA_DB}
+                  --protein-database {HUMANN2_AA_DB} \
+                  --metaphlan {METAPHLAN_DIR}
 
                   scp %s/{wildcards.sample}/{wildcards.sample}_genefamilies.tsv {output.genefamilies}
                   scp %s/{wildcards.sample}/{wildcards.sample}_pathcoverage.tsv {output.pathcoverage}

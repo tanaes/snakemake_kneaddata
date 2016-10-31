@@ -18,14 +18,13 @@ cp -r $CONDA_ENV_PATH/lib/python3.5/site-packages/kneaddata/tests/data/demo_bowt
 
 # Download metaphlan2
 wget https://bitbucket.org/biobakery/metaphlan2/get/default.zip
-unzip default.zip 'biobakery-metaphlan2*/db_v20/*' 'biobakery-metaphlan2*/metaphlan2.py'
-mv biobakery-metaphlan2*/metaphlan2.py $CONDA_ENV_PATH/bin/.
-mv biobakery-metaphlan2*/db_v20 $CONDA_ENV_PATH/share/metaphlan_db/db_v20
+unzip default.zip -d /home/jgsanders/miniconda/envs/kneaddata/share
+mv $CONDA_ENV_PATH/share/biobakery-metaphlan* $CONDA_ENV_PATH/share/metaphlan2
 
 # install humann2
 pip install humann2
 
 # download humann2 dbs
 mkdir $CONDA_ENV_PATH/share/humann2_db
-humann2_databases --download chocophlan full $CONDA_ENV_PATH/share/humann2_db/chocophlan
-humann2_databases --download uniref uniref90_ec_filtered_diamond $CONDA_ENV_PATH/share/humann2_db/uniref
+humann2_databases --download chocophlan full $CONDA_ENV_PATH/share/humann2_db
+humann2_databases --download uniref uniref90_ec_filtered_diamond $CONDA_ENV_PATH/share/humann2_db
