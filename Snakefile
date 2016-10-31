@@ -22,6 +22,11 @@ localrules: raw_make_links_pe, raw_make_links_se, multiQC_run, multiQC_all
 ENV_KNEAD = config["KNEAD_ENV"]
 shell.prefix(ENV_KNEAD + '; ')
 
+if "METAPHLAN_ENV" in config:
+    METAPHLAN_ENV = config["METAPHLAN_ENV"]
+else:
+    METAPHLAN_ENV = config["KNEAD_ENV"]
+
 
 #### Top-level rules: rules to execute a subset of the pipeline
 
@@ -236,7 +241,6 @@ rule qc_kneaddata_pe:
                          temp_dir))
 
 
-
 rule qc_kneaddata_se:
     """
     Run kneaddata on single end mode to filter host reads, eliminate Illumina
@@ -363,3 +367,92 @@ rule multiQC_all:
          set +u; source activate multiqc; set -u
          multiqc -f -o data/multiQC/all data 2> {log} 1>&2
          """
+
+
+rule metaphlan2_sample_pe:
+    """
+    Runs MetaPhlan2 on a set of samples to create a joint taxonomic profile for
+    input into HUMAnN2.
+    Going to do just R1 reads for now. Because of how I've split PE vs SE
+    processing and naming, still will need to make a separate rule for PE. 
+    """
+    input:
+        paired_f  = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_R1.fq.gz",
+        unpaired_f = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R1.fq.gz"
+    output:
+        "data/{sample}/{run}/metaphlan2/{sample}_metaphlan_output.tsv"
+    threads:
+        8
+    params:
+        env = METAPHLAN_ENV
+    log:
+        "logs/{run}/analysis/metaphlan2_sample_pe_{sample}.log"
+    benchmark:
+        "benchmark/{run}/analysis/metaphlan2_sample_pe_{sample}.json"
+
+    run:
+        with tempfile.TemporaryDirectory(dir=TMP_DIR_ROOT) as temp_dir:
+            shell("""
+                  set +u; {METAPHLAN_ENV}; set -u
+
+                  metaphlan2.py \
+                    --input_type fastq <(zcat {input.paired_f} {input.unpaired_f}) \
+                    --nproc {threads} \
+                    --tmp_dir %s \
+                    --input_type fastq > {output}
+                  """ % (temp_dir))
+
+
+rule combine_metaphlan:
+    """
+    Combines MetaPhlan2 output for unified taxonomic profile for Humann2
+    """
+
+    input:
+        expand("data/{sample}/{run}/metaphlan2/{sample}_metaphlan_output.tsv",
+               sample=SAMPLES_PE, run=RUN)
+    output:
+        joint_prof = "data/combined_analysis/{run}/humann2/joined_taxonomic_profile.tsv"
+        max_prof = "data/combined_analysis/{run}/humann2/joined_taxonomic_profile_max.tsv"
+    threads:
+        1
+    log:
+        "logs/{run}/analysis/combine_metaphlan.log"
+    benchmark:
+        "benchmark/{run}/analysis/combine_metaphlan.json"
+    run:
+        with tempfile.TemporaryDirectory(dir="data/combined_analysis") as temp_dir:
+            for file in input:
+                shell("ln -s {0} {1}".format(file, temp_dir))
+            shell("""
+                  humann2_join_tables --input %s --output {output.joint_prof}
+                  humann2_reduce_table --input {output.joint_prof} \
+                  --output {output.max_prof} --function max --sort-by level
+                  """ % (temp_dir))
+            shell("")
+
+# rule make_custom_chocophlan_db:
+
+# rule humann2_sample_pe:
+#     """
+#     Runs HUMAnN2 pipeline using general defaults.
+
+#     Going to do just R1 reads for now. Because of how I've split PE vs SE
+#     processing and naming, still will need to make a separate rule for PE. 
+#     """
+#     input:
+#         paired_f  = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_R1.fq.gz",
+#         unpaired_f = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R1.fq.gz"
+#     output:
+#         gene_table = "data/{sample}/{run}/humann2/{sample}_genetable.txt",
+#         pathway_table
+#         other thing
+
+# rule humann2_combine_tables
+#     input:
+#         gene_table = "data/{sample}/{run}/humann2/{sample}_genetable.txt",
+#     output:
+#         combined_gene_table = "data/combined_analysis/{run}/humann2/combined_gene_tables.tsv"
+
+
+
