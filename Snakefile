@@ -415,8 +415,10 @@ rule metaphlan2_sample_pe:
                   metaphlan2.py \
                     --input_type fastq <(zcat {input.paired_f} {input.unpaired_f}) \
                     --mpa_pkl {METAPHLAN_DB}/mpa_v20_m200.pkl \
+                    --bowtie2db {METAPHLAN_DB}/mpa_v20_m200 \
                     --nproc {threads} \
                     --tmp_dir %s \
+                    --no_map \
                     --input_type fastq > {output}
                   """ % (temp_dir))
 
