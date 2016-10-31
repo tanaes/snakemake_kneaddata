@@ -64,12 +64,6 @@ rule all:
             end = "R1 R2".split(),
             run = RUN,
             extension = "zip html".split()
-        ) + expand(
-            "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.{extension}",
-            sample = SAMPLES_SE,
-            end = "SE".split(),
-            run = RUN,
-            extension = "zip html".split()
         ),
         expand(
             "data/multiQC/{run}/multiqc_report.html",
@@ -279,7 +273,7 @@ rule qc_kneaddata_se:
                   """ % (temp_dir, temp_dir, temp_dir))
 
 
-rule qc_fastqc_pe:
+rule fastqc_kneaddata_pe:
     """
     Do FASTQC reports
     One thread per fastq.gz file
@@ -303,30 +297,6 @@ rule qc_fastqc_pe:
         2> {log} 1>&2
         """
 
-
-rule qc_fastqc_se:
-    """
-    Do FASTQC reports
-    One thread per fastq.gz file
-    """
-    input:
-        fastq = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq.gz"
-    output:
-        html = "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html",
-        zip =  "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip"
-    threads:
-        1
-    log:
-        "logs/{run}/qc/fastqc_kneaddata_{sample}_{end}.log"
-    benchmark:
-        "benchmarks/{run}/qc/fastqc_kneaddata_{sample}_{end}.json"
-    shell:
-        """
-        fastqc \
-            --outdir data/{wildcards.sample}/{wildcards.run}/fastqc_kneaddata \
-            {input.fastq} 
-        2> {log} 1>&2
-        """
 
 rule multiQC_run:
     """
