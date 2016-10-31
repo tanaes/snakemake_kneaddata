@@ -412,15 +412,17 @@ rule metaphlan2_sample_pe:
 
                   echo $mpa_dir
 
-                  metaphlan2.py \
-                    --input_type fastq <(zcat {input.paired_f} {input.unpaired_f}) \
+                  zcat {input.paired_f} {input.unpaired_f} > %s/input.fastq
+
+                  metaphlan2.py %s/input.fastq \
+                    --input_type fastq \
                     --mpa_pkl {METAPHLAN_DB}/mpa_v20_m200.pkl \
                     --bowtie2db {METAPHLAN_DB}/mpa_v20_m200 \
                     --nproc {threads} \
                     --tmp_dir %s \
                     --no_map \
                     --input_type fastq > {output}
-                  """ % (temp_dir))
+                  """ % (temp_dir,temp_dir,temp_dir))
 
 
 rule combine_metaphlan:
