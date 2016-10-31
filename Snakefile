@@ -59,13 +59,13 @@ rule all:
             end = "SE".split()
         ),
         expand(
-            "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.{extension}",
+            "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_paired_{end}_fastqc.{extension}",
             sample = SAMPLES_PE,
             end = "R1 R2".split(),
             run = RUN,
             extension = "zip html".split()
         ) + expand(
-            "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.{extension}",
+            "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_single_{end}_fastqc.{extension}",
             sample = SAMPLES_SE,
             end = "SE".split(),
             run = RUN,
@@ -194,8 +194,6 @@ rule qc_kneaddata_pe:
         paired_r  = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_R2.fq.gz",
         unpaired_f = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R1.fq.gz",
         unpaired_r = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R2.fq.gz",
-        all_f = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R1.fq.gz"),
-        all_r = temp("data/{sample}/{run}/kneaddata/{sample}_kneaddata_R2.fq.gz")
     params:
         db       = config["kneaddata_db"],
         output_prefix = "{sample}_kneaddata",
@@ -235,8 +233,6 @@ rule qc_kneaddata_pe:
                   scp %s/{wildcards.sample}_kneaddata_unmatched_1.fastq.gz {output.unpaired_f}
                   scp %s/{wildcards.sample}_kneaddata_unmatched_2.fastq.gz {output.unpaired_r}
 
-                  cat {output.paired_f} {output.unpaired_f} > {output.all_f}
-                  cat {output.paired_r} {output.unpaired_r} > {output.all_r}
                   """ % (temp_dir, temp_dir, temp_dir, temp_dir, temp_dir,
                          temp_dir, temp_dir, temp_dir, temp_dir, temp_dir))
 
@@ -283,16 +279,16 @@ rule qc_kneaddata_se:
                   """ % (temp_dir, temp_dir, temp_dir))
 
 
-rule qc_fastqc:
+rule qc_fastqc_pe:
     """
     Do FASTQC reports
     One thread per fastq.gz file
     """
     input:
-        fastq = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq.gz"
-    output:
-        html = "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html",
-        zip =  "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip"
+        fastq = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_{end}.fq.gz",
+   output:
+        html = "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_paired_{end}_fastqc.html",
+        zip =  "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_paired_{end}_fastqc.zip"
     threads:
         1
     log:
@@ -307,6 +303,30 @@ rule qc_fastqc:
         2> {log} 1>&2
         """
 
+
+rule qc_fastqc_se:
+    """
+    Do FASTQC reports
+    One thread per fastq.gz file
+    """
+    input:
+        fastq = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq.gz"
+    output:
+        html = "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_single_{end}_fastqc.html",
+        zip =  "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_single_{end}_fastqc.zip"
+    threads:
+        1
+    log:
+        "logs/{run}/qc/fastqc_kneaddata_{sample}_{end}.log"
+    benchmark:
+        "benchmarks/{run}/qc/fastqc_kneaddata_{sample}_{end}.json"
+    shell:
+        """
+        fastqc \
+            --outdir data/{wildcards.sample}/{wildcards.run}/fastqc_kneaddata \
+            {input.fastq} 
+        2> {log} 1>&2
+        """
 
 rule multiQC_run:
     """
