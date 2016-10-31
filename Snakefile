@@ -47,12 +47,12 @@ rule all:
             end = "SE".split(),
             extension = "zip html".split()
         ),
-        expand( # trimmomatic output for PE data
+        expand( # kneaddata output for PE data
             "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_{end}.fq.gz",
             sample = SAMPLES_PE,
             run = RUN,
             end = "R1 R2".split()
-        ) + expand( # fastqc zip and html for raw SE data
+        ) + expand( # kneaddata output for SE data
             "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq.gz",
             sample = SAMPLES_SE,
             run = RUN,
@@ -65,7 +65,7 @@ rule all:
             run = RUN,
             extension = "zip html".split()
         ) + expand(
-            "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_single_{end}_fastqc.{extension}",
+            "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.{extension}",
             sample = SAMPLES_SE,
             end = "SE".split(),
             run = RUN,
@@ -312,8 +312,8 @@ rule qc_fastqc_se:
     input:
         fastq = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq.gz"
     output:
-        html = "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_single_{end}_fastqc.html",
-        zip =  "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_single_{end}_fastqc.zip"
+        html = "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.html",
+        zip =  "data/{sample}/{run}/fastqc_kneaddata/{sample}_kneaddata_{end}_fastqc.zip"
     threads:
         1
     log:
