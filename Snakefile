@@ -493,7 +493,7 @@ rule humann2_sample_pe:
     benchmark:
         "benchmarks/{run}/analysis/humann2_sample_pe_{sample}.json"
     run:
-        with tempfile.TemporaryDirectory(dir="data/combined_analysis") as temp_dir:
+        with tempfile.TemporaryDirectory(dir=TMP_DIR_ROOT) as temp_dir:
             shell("""
                   zcat {input.paired_f} {input.unpaired_f} > %s/input.fastq
 
@@ -503,7 +503,7 @@ rule humann2_sample_pe:
                   --nucleotide-database {HUMANN2_NT_DB} \
                   --protein-database {HUMANN2_AA_DB} \
                   --metaphlan {METAPHLAN_DIR} 
-                  
+
                   scp %s/{wildcards.sample}/{wildcards.sample}_genefamilies.tsv {output.genefamilies}
                   scp %s/{wildcards.sample}/{wildcards.sample}_pathcoverage.tsv {output.pathcoverage}
                   scp %s/{wildcards.sample}/{wildcards.sample}_pathabundance.tsv {output.pathabundance}
