@@ -77,6 +77,23 @@ rule all:
         ),
         "data/multiQC/all/multiqc_report.html"
 
+rule kneaddata:
+    """
+    Rule to just do kneaddata, no fastqc
+    """
+    input:
+        expand( # kneaddata output for PE data
+            "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_{end}.fq.gz",
+            sample = SAMPLES_PE,
+            run = RUN,
+            end = "R1 R2".split()
+        ) + expand( # kneaddata output SE data
+            "data/{sample}/{run}/kneaddata/{sample}_kneaddata_{end}.fq.gz",
+            sample = SAMPLES_SE,
+            run = RUN,
+            end = "SE".split()
+        )
+
 
 rule raw_fastqc:
     """
