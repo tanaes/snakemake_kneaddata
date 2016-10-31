@@ -492,20 +492,20 @@ rule humann2_sample_pe:
     run:
         with tempfile.TemporaryDirectory(dir="data/combined_analysis") as temp_dir:
             shell("""
-                  zcat {input.paired_f} {input.unpaired_f} > {0}/input.fastq
+                  zcat {input.paired_f} {input.unpaired_f} > %s/input.fastq
 
-                  humann2 --input {0}/input.fastq \
-                  --output {0}/{wildcards.sample} \
+                  humann2 --input %s/input.fastq \
+                  --output %s/{wildcards.sample} \
                   --output-basename {wildcards.sample} \
                   --nucleotide-database {HUMANN2_NT_DB} \
                   --protein-database {HUMANN2_AA_DB}
 
-                  scp {0}/{wildcards.sample}/{wildcards.sample}_genefamilies.tsv {output.genefamilies}
-                  scp {0}/{wildcards.sample}/{wildcards.sample}_pathcoverage.tsv {output.pathcoverage}
-                  scp {0}/{wildcards.sample}/{wildcards.sample}_pathabundance.tsv {output.pathabundance}
+                  scp %s/{wildcards.sample}/{wildcards.sample}_genefamilies.tsv {output.genefamilies}
+                  scp %s/{wildcards.sample}/{wildcards.sample}_pathcoverage.tsv {output.pathcoverage}
+                  scp %s/{wildcards.sample}/{wildcards.sample}_pathabundance.tsv {output.pathabundance}
 
-                  scp {0}/{wildcards.sample}/{wildcards.sample}_humann2_temp/{wildcards.sample}_metaphlan_bugs_list.tsv {output.bugslist}
-                  """.format(temp_dir))
+                  scp %s/{wildcards.sample}/{wildcards.sample}_humann2_temp/{wildcards.sample}_metaphlan_bugs_list.tsv {output.bugslist}
+                  """ % (temp_dir,temp_dir,temp_dir,temp_dir,temp_dir,temp_dir,temp_dir))
             shell("")
 
 
