@@ -29,9 +29,12 @@ else:
 
 if "METAPHLAN_DB" in config:
     METAPHLAN_DB = config["METAPHLAN_DB"]
-else:
-    METAPHLAN_DB = '$mpa_dir'
 
+if "HUMANN2_NT_DB" in config:
+    HUMANN2_NT_DB = config["HUMANN2_NT_DB"]
+
+if "HUMANN2_AA_DB" in config:
+    HUMANN2_AA_DB = config["HUMANN2_AA_DB"]
 
 #### Top-level rules: rules to execute a subset of the pipeline
 
