@@ -461,7 +461,7 @@ rule combine_metaphlan:
     run:
         with tempfile.TemporaryDirectory(dir="data/combined_analysis") as temp_dir:
             for file in input:
-                shell("echo 'file %s'" % file)
+                shell("echo 'ln -s {0} {1}'".format(file, temp_dir))
             # shell("""
             #       humann2_join_tables --input %s --output {output.joint_prof}
             #       humann2_reduce_table --input {output.joint_prof} \
