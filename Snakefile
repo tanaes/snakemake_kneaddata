@@ -478,15 +478,15 @@ rule combine_metaphlan:
     benchmark:
         "benchmarks/{run}/analysis/combine_metaphlan.json"
     run:
-        temp_dir = "data/combined_analysis/tempdir"
-        for file in input:
-            shell("cp {0} {1}/.".format(file, temp_dir))
-        shell("""
-              humann2_join_tables --input %s --output {output.joint_prof}
-              humann2_reduce_table --input {output.joint_prof} \
-              --output {output.max_prof} --function max --sort-by level
-              """ % (temp_dir))
-        shell("")
+        with tempfile.TemporaryDirectory(dir=TMP_DIR_ROOT) as temp_dir:
+            for file in input:
+                shell("cp {0} {1}/.".format(file, temp_dir))
+            shell("""
+                  humann2_join_tables --input %s --output {output.joint_prof}
+                  humann2_reduce_table --input {output.joint_prof} \
+                  --output {output.max_prof} --function max --sort-by level
+                  """ % (temp_dir))
+            shell("")
 
 # rule make_custom_chocophlan_db:
 
