@@ -461,13 +461,13 @@ rule combine_metaphlan:
     run:
         with tempfile.TemporaryDirectory(dir="data/combined_analysis") as temp_dir:
             for file in input:
-                shell("ln -s {0} {1}".format(file, temp_dir))
-            shell("""
-                  humann2_join_tables --input %s --output {output.joint_prof}
-                  humann2_reduce_table --input {output.joint_prof} \
-                  --output {output.max_prof} --function max --sort-by level
-                  """ % (temp_dir))
-            shell("")
+                shell("echo 'file %s'" % file)
+            # shell("""
+            #       humann2_join_tables --input %s --output {output.joint_prof}
+            #       humann2_reduce_table --input {output.joint_prof} \
+            #       --output {output.max_prof} --function max --sort-by level
+            #       """ % (temp_dir))
+            # shell("")
 
 # rule make_custom_chocophlan_db:
 
