@@ -117,6 +117,19 @@ rule humann2:
             "data/{sample}/{run}/metaphlan2/{sample}_metaphlan_output.tsv",
             sample = SAMPLES_PE,
             run = RUN
+        ) +
+        expand(
+            "data/combined_analysis/{run}/humann2/joined_taxonomic_profile.tsv",
+            run = RUN
+        ),
+        expand(
+            "data/combined_analysis/{run}/humann2/joined_taxonomic_profile_max.tsv",
+            run = RUN
+        ),
+        expand(
+            "data/{sample}/{run}/humann2/{sample}_metaphlan_bugs_list.tsv",
+            sample = SAMPLES_PE,
+            run = RUN
         )
 
 rule raw_make_links_pe:
@@ -401,7 +414,7 @@ rule metaphlan2_sample_pe:
     log:
         "logs/{run}/analysis/metaphlan2_sample_pe_{sample}.log"
     benchmark:
-        "benchmark/{run}/analysis/metaphlan2_sample_pe_{sample}.json"
+        "benchmarks/{run}/analysis/metaphlan2_sample_pe_{sample}.json"
 
     run:
         with tempfile.TemporaryDirectory(dir=TMP_DIR_ROOT) as temp_dir:
@@ -441,7 +454,7 @@ rule combine_metaphlan:
     log:
         "logs/{run}/analysis/combine_metaphlan.log"
     benchmark:
-        "benchmark/{run}/analysis/combine_metaphlan.json"
+        "benchmarks/{run}/analysis/combine_metaphlan.json"
     run:
         with tempfile.TemporaryDirectory(dir="data/combined_analysis") as temp_dir:
             for file in input:
@@ -455,20 +468,46 @@ rule combine_metaphlan:
 
 # rule make_custom_chocophlan_db:
 
-# rule humann2_sample_pe:
-#     """
-#     Runs HUMAnN2 pipeline using general defaults.
+rule humann2_sample_pe:
+    """
+    Runs HUMAnN2 pipeline using general defaults.
 
-#     Going to do just R1 reads for now. Because of how I've split PE vs SE
-#     processing and naming, still will need to make a separate rule for PE. 
-#     """
-#     input:
-#         paired_f  = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_R1.fq.gz",
-#         unpaired_f = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R1.fq.gz"
-#     output:
-#         gene_table = "data/{sample}/{run}/humann2/{sample}_genetable.txt",
-#         pathway_table
-#         other thing
+    Going to do just R1 reads for now. Because of how I've split PE vs SE
+    processing and naming, still will need to make a separate rule for PE. 
+    """
+    input:
+        paired_f  = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_paired_R1.fq.gz",
+        unpaired_f = "data/{sample}/{run}/kneaddata/{sample}_kneaddata_unmatched_R1.fq.gz"
+    output:
+        genefamilies = "data/{sample}/{run}/humann2/{sample}_genefamilies.tsv",
+        pathcoverage = "data/{sample}/{run}/humann2/{sample}_pathcoverage.tsv",
+        pathabundance = "data/{sample}/{run}/humann2/{sample}_pathabundance.tsv",
+        bugslist = "data/{sample}/{run}/humann2/{sample}_metaphlan_bugs_list.tsv"
+    threads:
+        8
+    log:
+        "logs/{run}/analysis/humann2_sample_pe_{sample}.log"
+    benchmark:
+        "benchmarks/{run}/analysis/humann2_sample_pe_{sample}.json"
+    run:
+        with tempfile.TemporaryDirectory(dir="data/combined_analysis") as temp_dir:
+            shell("""
+                  zcat {input.paired_f} {input.unpaired_f} > {0}/input.fastq
+
+                  humann2 --input {0}/input.fastq \
+                  --output {0}/{wildcards.sample} \
+                  --output-basename {wildcards.sample} \
+                  --nucleotide-database {HUMANN2_NT_DB} \
+                  --protein-database {HUMANN2_AA_DB}
+
+                  scp {0}/{wildcards.sample}/{wildcards.sample}_genefamilies.tsv {output.genefamilies}
+                  scp {0}/{wildcards.sample}/{wildcards.sample}_pathcoverage.tsv {output.pathcoverage}
+                  scp {0}/{wildcards.sample}/{wildcards.sample}_pathabundance.tsv {output.pathabundance}
+
+                  scp {0}/{wildcards.sample}/{wildcards.sample}_humann2_temp/{wildcards.sample}_metaphlan_bugs_list.tsv {output.bugslist}
+                  """.format(temp_dir))
+            shell("")
+
 
 # rule humann2_combine_tables
 #     input:
