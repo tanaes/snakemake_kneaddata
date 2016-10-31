@@ -502,7 +502,8 @@ rule humann2_sample_pe:
                   --output-basename {wildcards.sample} \
                   --nucleotide-database {HUMANN2_NT_DB} \
                   --protein-database {HUMANN2_AA_DB} \
-                  --metaphlan {METAPHLAN_DIR}
+                  --metaphlan {METAPHLAN_DIR} \
+                  --metaphlan-options '--mpa_pkl {METAPHLAN_DIR}/db_v20/mpa_v20_m200.pkl --bowtie2db {METAPHLAN_DIR}/db_v20/mpa_v20_m200'
 
                   scp %s/{wildcards.sample}/{wildcards.sample}_genefamilies.tsv {output.genefamilies}
                   scp %s/{wildcards.sample}/{wildcards.sample}_pathcoverage.tsv {output.pathcoverage}
