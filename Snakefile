@@ -478,7 +478,7 @@ rule combine_metaphlan:
     benchmark:
         "benchmarks/{run}/analysis/combine_metaphlan.json"
     run:
-        with tempfile.TemporaryDirectory(dir="data/combined_analysis") as temp_dir:
+        with "data/combined_analysis/tempdir" as temp_dir:
             for file in input:
                 shell("ln -s {0} {1}/.".format(file, temp_dir))
             shell("""
